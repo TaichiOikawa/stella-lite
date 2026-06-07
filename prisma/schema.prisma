@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// 借用者(クラス)。stella-old のクラス単位の貸し出しを踏襲。
+model Class {
+  id        String    @id @default(cuid())
+  grade     Int // 学年
+  number    Int // 組
+  color     String? // クラスカラー(任意)
+  createdAt DateTime  @default(now())
+  lendings  Lending[]
+
+  @@unique([grade, number])
+}
+
+/// 物品管理。totalQuantity が総在庫数。残数は貸出中の合計を差し引いて算出する。
+model Item {
+  id            String    @id @default(cuid())
+  name          String    @unique // 同じ名前の物品は登録不可
+  totalQuantity Int // 総在庫数
+  createdAt     DateTime  @default(now())
+  lendings      Lending[]
+}
+
+/// 貸し出し記録。endTime が null なら貸出中、値があれば返却済み。
+/// itemId が null のときはカスタム物品(customItemName を表示)。
+model Lending {
+  id             String    @id @default(cuid())
+  item           Item?     @relation(fields: [itemId], references: [id])
+  itemId         String? // カスタム物品時は null
+  customItemName String? // itemId が null のときの物品名
+  class          Class     @relation(fields: [classId], references: [id])
+  classId        String
+  amount         Int // 貸出中の数量(部分返却で減る)
+  startTime      DateTime  @default(now())
+  endTime        DateTime? // null = 貸出中 / 値あり = 返却済み
+
+  @@index([endTime])
+  @@index([itemId])
+}
