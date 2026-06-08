@@ -4,10 +4,12 @@ import Link from "next/link";
 import { ItemsManager } from "@/components/items/items-manager";
 import { buttonVariants } from "@/components/ui/button";
 import { getItemsWithRemaining } from "@/lib/lending";
+import { requireApprovedUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function ItemsPage() {
+  await requireApprovedUser();
   const items = await getItemsWithRemaining();
 
   return (

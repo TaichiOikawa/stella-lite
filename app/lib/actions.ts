@@ -4,8 +4,27 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { prisma } from "@/lib/prisma";
+import { getSessionUser } from "@/lib/session";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
+
+/** ログイン中の本人が承認申請する。userId はセッションから取得する。 */
+export async function applyForApproval(): Promise<ActionResult> {
+  const user = await getSessionUser();
+  if (!user) return { ok: false, error: "ログインが必要です。" };
+  if (user.approved) return { ok: true };
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { applied: true },
+    });
+  } catch {
+    return { ok: false, error: "申請に失敗しました。" };
+  }
+  revalidatePath("/pending");
+  revalidatePath("/admin/users");
+  return { ok: true };
+}
 
 /** 貸し出し・物品ページの再描画 */
 function revalidateLending() {

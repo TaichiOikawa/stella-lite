@@ -43,14 +43,14 @@ export function LentTable({ lendings }: { lendings: ActiveLending[] }) {
 
   return (
     <>
-      <div className="rounded-lg border">
+      <div className="overflow-x-auto rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>クラス</TableHead>
               <TableHead>物品名</TableHead>
               <TableHead className="text-right">個数</TableHead>
-              <TableHead>開始時間</TableHead>
+              <TableHead className="hidden sm:table-cell">開始時間</TableHead>
               <TableHead className="text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -72,12 +72,12 @@ export function LentTable({ lendings }: { lendings: ActiveLending[] }) {
                 <TableCell className="text-right tabular-nums">
                   {l.amount}
                 </TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="hidden text-muted-foreground sm:table-cell">
                   {formatDateTime(l.startTime)}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button
-                    size="lg"
+                    size="sm"
                     variant="outline"
                     onClick={() => setTarget(l)}
                   >

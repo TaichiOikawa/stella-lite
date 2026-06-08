@@ -5,6 +5,12 @@ services:
       - "3000:3000"
     environment:
       DATABASE_URL: "postgres://postgres:password@db:5432/stella_lite?sslmode=disable"
+      BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET}"
+      BETTER_AUTH_URL: "${BASE_URL}"
+      NEXT_PUBLIC_APP_URL: "${BASE_URL}"
+      LINE_CLIENT_ID: "${LINE_CLIENT_ID}"
+      LINE_CLIENT_SECRET: "${LINE_CLIENT_SECRET}"
+      ADMIN_LINE_ID: "${ADMIN_LINE_ID}"
     depends_on:
       db:
         condition: service_healthy

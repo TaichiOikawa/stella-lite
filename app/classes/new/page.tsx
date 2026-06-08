@@ -3,8 +3,10 @@ import { ChevronLeftIcon } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { ClassCreateForm } from "@/components/classes/class-create-form";
+import { requireApprovedUser } from "@/lib/session";
 
-export default function NewClassPage() {
+export default async function NewClassPage() {
+  await requireApprovedUser();
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3">

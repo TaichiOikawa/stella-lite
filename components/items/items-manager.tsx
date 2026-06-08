@@ -50,7 +50,7 @@ export function ItemsManager({ items }: { items: ItemWithRemaining[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-lg border">
+      <div className="overflow-x-auto rounded-lg border">
         <Table>
           <TableHeader>
             <TableRow>

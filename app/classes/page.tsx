@@ -4,10 +4,12 @@ import Link from "next/link";
 import { ClassesManager } from "@/components/classes/classes-manager";
 import { buttonVariants } from "@/components/ui/button";
 import { getClasses } from "@/lib/lending";
+import { requireApprovedUser } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function ClassesPage() {
+  await requireApprovedUser();
   const classes = await getClasses();
 
   return (

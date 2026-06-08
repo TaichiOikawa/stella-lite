@@ -2,12 +2,14 @@ import Link from "next/link";
 import { ChevronLeftIcon } from "lucide-react";
 
 import { getClasses, getItemsWithRemaining } from "@/lib/lending";
+import { requireApprovedUser } from "@/lib/session";
 import { buttonVariants } from "@/components/ui/button";
 import { ItemLentForm } from "@/components/lending/item-lent-form";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewLendingPage() {
+  await requireApprovedUser();
   const [classes, items] = await Promise.all([
     getClasses(),
     getItemsWithRemaining(),

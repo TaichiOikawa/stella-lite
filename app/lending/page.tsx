@@ -2,12 +2,14 @@ import Link from "next/link";
 import { PlusIcon } from "lucide-react";
 
 import { getActiveLendings } from "@/lib/lending";
+import { requireApprovedUser } from "@/lib/session";
 import { buttonVariants } from "@/components/ui/button";
 import { LentTable } from "@/components/lending/lent-table";
 
 export const dynamic = "force-dynamic";
 
 export default async function LendingPage() {
+  await requireApprovedUser();
   const lendings = await getActiveLendings();
 
   return (
