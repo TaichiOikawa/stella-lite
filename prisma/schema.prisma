@@ -18,7 +18,8 @@ model user {
   email         String    @unique
   emailVerified Boolean
   image         String?
-  approved      Boolean   @default(false)
+  approved      Boolean   @default(false) // アクセス許可フラグ
+  admin         Boolean   @default(false) // 管理者(収集画像/カテゴリ/ユーザー管理)
   applied       Boolean   @default(false)
   createdAt     DateTime
   updatedAt     DateTime
@@ -100,4 +101,27 @@ model Lending {
 
   @@index([endTime])
   @@index([itemId])
+}
+
+// --- 画像収集機能 (collect-images から統合) ---
+
+/// 収集画像のカテゴリ。画像のグルーピングに使う。
+model Category {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  images    Image[]
+}
+
+/// アップロードされた画像。実体は public/uploads に保存し、url で配信する。
+model Image {
+  id           String    @id @default(cuid())
+  filename     String // ディスク上の保存名 (例: <uuid>.png)
+  originalName String
+  url          String // 公開パス (例: /uploads/<uuid>.png)
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now())
+
+  @@index([categoryId])
 }
