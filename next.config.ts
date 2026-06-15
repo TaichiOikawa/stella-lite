@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [new URL("https://profile.line-scdn.net/*")],
   },
+  experimental: {
+    proxyClientMaxBodySize: "100mb",
+  },
 };
 
 export default nextConfig;

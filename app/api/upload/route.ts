@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getSessionUser } from "@/lib/session";
 import { saveUpload } from "@/lib/storage";
 
-const MAX_FILE_BYTES = 25 * 1024 * 1024; // 25MB per file
+const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50MB per file
 
 export async function POST(request: Request) {
   const sessionUser = await getSessionUser();
