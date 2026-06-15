@@ -54,7 +54,13 @@ function matchesPath(pathname: string, target: string): boolean {
   return pathname === target || pathname.startsWith(target + "/");
 }
 
-export function SiteNav({ isAdmin = false }: { isAdmin?: boolean }) {
+export function SiteNav({
+  isAdmin = false,
+  isApproved = false,
+}: {
+  isAdmin?: boolean;
+  isApproved?: boolean;
+}) {
   const pathname = usePathname();
   const { data: session } = authClient.useSession();
 
@@ -100,9 +106,9 @@ export function SiteNav({ isAdmin = false }: { isAdmin?: boolean }) {
             })}
           </nav>
 
-          {/* ユーザー管理(管理者のみ) + ユーザー情報 + サインアウト */}
+          {/* ユーザー管理(承認済みユーザー) + ユーザー情報 + サインアウト */}
           <div className="flex shrink-0 items-center gap-2">
-            {isAdmin && (
+            {isApproved && (
               <Link
                 href="/admin/users"
                 aria-label="ユーザー管理"

@@ -33,7 +33,13 @@ function statusLabel(user: User) {
   return "未申請";
 }
 
-export function UsersTable({ users }: { users: User[] }) {
+export function UsersTable({
+  users,
+  isAdmin,
+}: {
+  users: User[];
+  isAdmin: boolean;
+}) {
   const [isPending, startTransition] = useTransition();
 
   function run(action: () => Promise<{ ok: boolean; error?: string }>) {
@@ -90,19 +96,21 @@ export function UsersTable({ users }: { users: User[] }) {
                   <Button
                     size="sm"
                     variant={user.approved ? "outline" : "default"}
-                    disabled={isPending}
+                    disabled={isPending || (user.admin && !isAdmin)}
                     onClick={() => run(() => toggleUserApproval(user.id))}
                   >
                     {user.approved ? "承認取り消し" : "承認する"}
                   </Button>
-                  <Button
-                    size="sm"
-                    variant={user.admin ? "outline" : "secondary"}
-                    disabled={isPending}
-                    onClick={() => run(() => toggleUserAdmin(user.id))}
-                  >
-                    {user.admin ? "管理者解除" : "管理者にする"}
-                  </Button>
+                  {isAdmin && (
+                    <Button
+                      size="sm"
+                      variant={user.admin ? "outline" : "secondary"}
+                      disabled={isPending}
+                      onClick={() => run(() => toggleUserAdmin(user.id))}
+                    >
+                      {user.admin ? "管理者解除" : "管理者にする"}
+                    </Button>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

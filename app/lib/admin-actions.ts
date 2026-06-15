@@ -2,21 +2,25 @@
 
 import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/prisma"
-import { requireAdminUser } from "@/lib/session"
+import { requireAdminUser, requireApprovedUser } from "@/lib/session"
 import type { ActionResult } from "./actions"
 
 /**
- * 指定ユーザーの承認状態をトグルする(管理者のみ実行可)。
+ * 指定ユーザーの承認状態をトグルする(承認済みユーザーが実行可)。
  * 承認を取り消す場合は管理者権限も併せて解除する。
+ * ただし管理者の承認を変更できるのは管理者のみ(承認取り消しが管理者権限の剥奪にもなるため)。
  */
 export async function toggleUserApproval(userId: string): Promise<ActionResult> {
-  await requireAdminUser()
+  const currentUser = await requireApprovedUser()
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { approved: true },
+      select: { approved: true, admin: true },
     })
     if (!user) return { ok: false, error: "ユーザーが見つかりません。" }
+    if (user.admin && !currentUser.admin) {
+      return { ok: false, error: "管理者の承認状態は管理者のみ変更できます。" }
+    }
     const nextApproved = !user.approved
     await prisma.user.update({
       where: { id: userId },

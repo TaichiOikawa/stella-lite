@@ -9,7 +9,10 @@ export default async function RootLayout({
   const user = await getSessionUser();
   return (
     <>
-      <SiteNav isAdmin={user?.admin ?? false} />
+      <SiteNav
+        isAdmin={user?.admin ?? false}
+        isApproved={user?.approved ?? false}
+      />
       <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
         {children}
       </div>
