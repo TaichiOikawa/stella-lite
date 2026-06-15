@@ -20,8 +20,8 @@
 # production
 /build
 
-# uploaded images (stored on disk at runtime)
-/public/uploads
+# uploaded images (stored on disk at runtime, served via /api/uploads)
+/storage/uploads
 
 # misc
 .DS_Store

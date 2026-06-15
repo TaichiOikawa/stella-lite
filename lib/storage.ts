@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
+// public の外に保存し、静的配信されないようにする。
+// 配信は認証付きの API ルート (/api/uploads/<filename>) 経由で行う。
+const UPLOAD_DIR = path.join(process.cwd(), "storage", "uploads");
 
 const MIME_EXTENSIONS: Record<string, string> = {
   "image/png": ".png",
@@ -12,6 +14,21 @@ const MIME_EXTENSIONS: Record<string, string> = {
   "image/webp": ".webp",
   "image/avif": ".avif",
 };
+
+const EXTENSION_MIME: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".gif": "image/gif",
+  ".webp": "image/webp",
+  ".avif": "image/avif",
+};
+
+/** 保存名の拡張子から配信用の Content-Type を返す。不明なら octet-stream。 */
+export function contentTypeForFilename(filename: string): string {
+  const ext = path.extname(filename).toLowerCase();
+  return EXTENSION_MIME[ext] ?? "application/octet-stream";
+}
 
 function extensionFor(file: File): string {
   const fromMime = MIME_EXTENSIONS[file.type];
@@ -30,7 +47,7 @@ export async function saveUpload(
   const filename = `${randomUUID()}${extensionFor(file)}`;
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-  return { filename, url: `/uploads/${filename}` };
+  return { filename, url: `/api/uploads/${filename}` };
 }
 
 /** 保存済みのアップロードを Buffer として読み込む。 */

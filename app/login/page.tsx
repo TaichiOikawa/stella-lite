@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { authClient } from "@/lib/auth-client";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 
 function LoginButton() {
   const searchParams = useSearchParams();
@@ -25,9 +26,16 @@ function LoginButton() {
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center mx-5">
       <div className="flex flex-col items-center gap-4">
-        <h1 className="text-xl font-semibold">物品貸し出し管理</h1>
+        <Image
+          src="/stella.svg"
+          alt="Logo"
+          width={200}
+          height={120}
+          className="mx-5"
+        />
+        <h1 className="text-2xl font-bold">ログイン</h1>
         <Suspense>
           <LoginButton />
         </Suspense>
