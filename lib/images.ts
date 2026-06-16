@@ -6,10 +6,10 @@ export type CategoryWithCount = {
   imageCount: number;
 };
 
-/** 全カテゴリを名前順で、画像枚数込みで返す。 */
+/** 全カテゴリを表示順(order)で、画像枚数込みで返す。 */
 export async function getCategories(): Promise<CategoryWithCount[]> {
   const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
     include: { _count: { select: { images: true } } },
   });
   return categories.map((c) => ({

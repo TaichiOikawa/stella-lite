@@ -39,9 +39,24 @@ export async function createCategory(
     return { error: "同じ名前のカテゴリが既に存在します" };
   }
 
-  await prisma.category.create({ data: { name: parsed.data } });
+  // 新規カテゴリは末尾に追加する。
+  const count = await prisma.category.count();
+  await prisma.category.create({
+    data: { name: parsed.data, order: count },
+  });
   revalidate();
   return { success: true };
+}
+
+/** カテゴリの表示順を、渡された id の並びで更新する。 */
+export async function reorderCategories(ids: string[]): Promise<void> {
+  await requireAdminUser();
+  await prisma.$transaction(
+    ids.map((id, index) =>
+      prisma.category.update({ where: { id }, data: { order: index } }),
+    ),
+  );
+  revalidate();
 }
 
 export async function renameCategory(

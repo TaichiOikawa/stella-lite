@@ -109,8 +109,11 @@ model Lending {
 model Category {
   id        String   @id @default(cuid())
   name      String   @unique
+  order     Int      @default(0) // 表示順(画像送信のカテゴリ並び替え用)
   createdAt DateTime @default(now())
   images    Image[]
+
+  @@index([order])
 }
 
 /// アップロードされた画像。実体は public/uploads に保存し、url で配信する。
