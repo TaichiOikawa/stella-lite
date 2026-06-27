@@ -1,11 +1,17 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import type { ActiveLending } from "@/lib/lending";
-import { classLabel, formatDateTime } from "@/lib/format";
+import { classLabel, formatDateTime, isOverdue } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { partialReturnLending } from "@/app/lib/actions";
+import {
+  applyDir,
+  SortableHead,
+  useSort,
+} from "@/components/lending/sortable-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,8 +36,32 @@ function itemName(l: ActiveLending): string {
   return l.item?.name ?? l.customItemName ?? "(不明な物品)";
 }
 
+type SortKey = "class" | "item" | "amount" | "start";
+
+function compare(a: ActiveLending, b: ActiveLending, key: SortKey): number {
+  switch (key) {
+    case "class":
+      return a.class.grade - b.class.grade || a.class.number - b.class.number;
+    case "item":
+      return itemName(a).localeCompare(itemName(b), "ja");
+    case "amount":
+      return a.amount - b.amount;
+    case "start":
+      return (
+        new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+      );
+  }
+}
+
 export function LentTable({ lendings }: { lendings: ActiveLending[] }) {
   const [target, setTarget] = useState<ActiveLending | null>(null);
+  const sort = useSort<SortKey>("start", "desc", "lending-active-sort");
+
+  const sorted = useMemo(
+    () =>
+      [...lendings].sort((a, b) => applyDir(compare(a, b, sort.key), sort.dir)),
+    [lendings, sort.key, sort.dir],
+  );
 
   if (lendings.length === 0) {
     return (
@@ -47,16 +77,33 @@ export function LentTable({ lendings }: { lendings: ActiveLending[] }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>クラス</TableHead>
-              <TableHead>物品名</TableHead>
-              <TableHead className="text-right">個数</TableHead>
-              <TableHead className="hidden sm:table-cell">開始時間</TableHead>
+              <SortableHead sortKey="class" label="クラス" sort={sort} />
+              <SortableHead sortKey="item" label="物品名" sort={sort} />
+              <SortableHead
+                sortKey="amount"
+                label="個数"
+                sort={sort}
+                className="text-right"
+              />
+              <SortableHead
+                sortKey="start"
+                label="開始時間"
+                sort={sort}
+                className="hidden sm:table-cell"
+              />
               <TableHead className="text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {lendings.map((l) => (
-              <TableRow key={l.id}>
+            {sorted.map((l) => {
+              const overdue = isOverdue(l);
+              return (
+              <TableRow
+                key={l.id}
+                className={cn(
+                  overdue && "bg-destructive/10 hover:bg-destructive/15",
+                )}
+              >
                 <TableCell className="font-medium">
                   <span className="inline-flex items-center gap-2">
                     {l.class.color && (
@@ -68,7 +115,16 @@ export function LentTable({ lendings }: { lendings: ActiveLending[] }) {
                     {classLabel(l.class)}
                   </span>
                 </TableCell>
-                <TableCell>{itemName(l)}</TableCell>
+                <TableCell>
+                  <span className="inline-flex flex-wrap items-center gap-2">
+                    {itemName(l)}
+                    {overdue && (
+                      <span className="rounded bg-destructive/15 px-1.5 py-0.5 text-xs font-medium text-destructive">
+                        未返却
+                      </span>
+                    )}
+                  </span>
+                </TableCell>
                 <TableCell className="text-right tabular-nums">
                   {l.amount}
                 </TableCell>
@@ -85,7 +141,8 @@ export function LentTable({ lendings }: { lendings: ActiveLending[] }) {
                   </Button>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </div>

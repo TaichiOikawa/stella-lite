@@ -28,6 +28,7 @@ function buildSystems(isAdmin: boolean): System[] {
       prefixes: ["/lending", "/items", "/classes"],
       links: [
         { href: "/lending", label: "貸し出し" },
+        { href: "/lending/history", label: "履歴" },
         { href: "/items", label: "物品管理" },
         { href: "/classes", label: "クラス管理" },
       ],
@@ -155,8 +156,17 @@ export function SiteNav({
         {/* 下段: 選択中の系統のサブナビ (横スクロール)。系統未選択時は非表示。 */}
         {activeSystem && (
           <nav className="flex gap-1 overflow-x-auto border-t pt-2 pb-2">
-            {activeSystem.links.map((link) => {
-              const active = matchesPath(pathname, link.href);
+            {(() => {
+              // 最も具体的(href が最長)に一致するリンクのみを選択状態にする。
+              const activeHref = activeSystem.links
+                .filter((l) => matchesPath(pathname, l.href))
+                .reduce<string | null>(
+                  (best, l) =>
+                    best && best.length >= l.href.length ? best : l.href,
+                  null,
+                );
+              return activeSystem.links.map((link) => {
+              const active = link.href === activeHref;
               return (
                 <Link
                   key={link.href}
@@ -171,7 +181,8 @@ export function SiteNav({
                   {link.label}
                 </Link>
               );
-            })}
+            });
+            })()}
           </nav>
         )}
       </div>

@@ -43,6 +43,16 @@ export async function getActiveLendings() {
 
 export type ActiveLending = Awaited<ReturnType<typeof getActiveLendings>>[number];
 
+/** 全貸し出し記録(貸出中・返却済み)を物品・クラス付きで返す */
+export async function getLendingHistory() {
+  return prisma.lending.findMany({
+    orderBy: { startTime: "desc" },
+    include: { item: true, class: true },
+  });
+}
+
+export type LendingRecord = Awaited<ReturnType<typeof getLendingHistory>>[number];
+
 /** クラス一覧(学年・組 昇順) */
 export async function getClasses() {
   return prisma.class.findMany({
